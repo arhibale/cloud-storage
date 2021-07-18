@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainController">
+    <MenuBar>
+        <Menu mnemonicParsing="false" text="File">
+            <MenuItem mnemonicParsing="false" text="Close" />
+        </Menu>
+        <Menu mnemonicParsing="false" text="Edit">
+            <MenuItem mnemonicParsing="false" text="Delete" />
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+            <MenuItem mnemonicParsing="false" text="About" />
+        </Menu>
+    </MenuBar>
+    <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="375.0" prefWidth="600.0">
+        <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints />
+            <RowConstraints maxHeight="206.0" minHeight="0.0" prefHeight="38.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="392.0" minHeight="10.0" prefHeight="337.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+        <ListView fx:id="listViewClient" prefHeight="327.0" prefWidth="182.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <GridPane.margin>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+            </GridPane.margin>
+        </ListView>
+        <ListView fx:id="listViewServer" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+            <GridPane.margin>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+            </GridPane.margin>
+        </ListView>
+        <TextField editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <GridPane.margin>
+                <Insets left="5.0" right="5.0" />
+            </GridPane.margin>
+        </TextField>
+        <TextField editable="false" GridPane.columnIndex="3" GridPane.rowIndex="1">
+            <GridPane.margin>
+                <Insets left="5.0" right="5.0" />
+            </GridPane.margin>
+        </TextField>
+        <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
+            <TextField fx:id="statusBar" alignment="CENTER" editable="false" layoutX="26.0" layoutY="298.0" />
+            <Button layoutX="74.0" layoutY="267.0" mnemonicParsing="false" onAction="#refreshAll" text="refresh" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="74.0" AnchorPane.rightAnchor="73.0" AnchorPane.topAnchor="267.0" />
+            <Button layoutX="123.0" layoutY="144.0" mnemonicParsing="false" onAction="#toTheServer" text="&lt;" textAlignment="CENTER" AnchorPane.bottomAnchor="168.0" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="144.0" />
+            <Button layoutX="22.0" layoutY="144.0" mnemonicParsing="false" onAction="#fromTheServer" text="&gt;" textAlignment="CENTER" AnchorPane.bottomAnchor="168.0" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="125.0" AnchorPane.topAnchor="144.0" />
+        </AnchorPane>
+    </GridPane>
+</VBox>
