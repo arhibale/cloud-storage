@@ -3,3 +3,5 @@
 /server/target/
 /target/
 /.idea/
+/client/clientFiles/
+/server/serverFiles/

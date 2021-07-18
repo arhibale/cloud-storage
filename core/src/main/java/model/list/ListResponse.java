@@ -1,4 +1,7 @@
-package model;
+package model.list;
+
+import model.AbstractCommand;
+import model.CommandType;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -6,7 +9,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ListResponse implements AbstractCommand{
+public class ListResponse implements AbstractCommand {
 
     private final List<String> names;
 

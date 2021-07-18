@@ -10,6 +10,7 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import lombok.extern.slf4j.Slf4j;
 import model.AbstractCommand;
+import model.list.ListRequest;
 
 @Slf4j
 public class NettyNetwork {
@@ -26,21 +27,21 @@ public class NettyNetwork {
             EventLoopGroup worker = new NioEventLoopGroup();
             try {
                 Bootstrap bootstrap = new Bootstrap();
-                bootstrap.group(worker)
-                        .channel(NioSocketChannel.class)
-                        .handler(new ChannelInitializer<SocketChannel>() {
-                            @Override
-                            protected void initChannel(SocketChannel c) throws Exception {
-                                channel = c;
-                                c.pipeline().addLast(
-                                        new ObjectEncoder(),
-                                        new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-                                        new ClientCommandHandler(callBack)
-                                );
-                            }
-                        });
-
+                bootstrap.group(worker);
+                bootstrap.channel(NioSocketChannel.class);
+                bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel c) {
+                        channel = c;
+                        c.pipeline().addLast(
+                                new ObjectEncoder(),
+                                new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
+                                new ClientCommandHandler(callBack)
+                        );
+                    }
+                });
                 ChannelFuture future = bootstrap.connect(IP, PORT).sync();
+                writeMessage(new ListRequest());
                 future.channel().closeFuture().sync();
             } catch (Exception e) {
                 e.printStackTrace();
