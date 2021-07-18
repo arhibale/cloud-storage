@@ -9,7 +9,7 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import lombok.extern.slf4j.Slf4j;
-import model.Message;
+import model.AbstractCommand;
 
 @Slf4j
 public class NettyNetwork {
@@ -35,7 +35,7 @@ public class NettyNetwork {
                                 c.pipeline().addLast(
                                         new ObjectEncoder(),
                                         new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-                                        new ClientMessageHandler(callBack)
+                                        new ClientCommandHandler(callBack)
                                 );
                             }
                         });
@@ -52,7 +52,7 @@ public class NettyNetwork {
         thread.start();
     }
 
-    public void writeMessage(Message message) {
-        channel.writeAndFlush(message);
+    public void writeMessage(AbstractCommand command) {
+        channel.writeAndFlush(command);
     }
 }

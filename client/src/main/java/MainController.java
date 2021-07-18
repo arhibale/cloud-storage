@@ -6,10 +6,12 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import model.Message;
+import lombok.SneakyThrows;
+import model.CommandType;
+import model.ListRequest;
+import model.ListResponse;
 
 public class MainController implements Initializable {
     @FXML
@@ -21,6 +23,7 @@ public class MainController implements Initializable {
 
     private NettyNetwork network;
 
+    @SneakyThrows
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         refresh();
@@ -40,16 +43,25 @@ public class MainController implements Initializable {
         File dir = new File("./client/clientFiles");
         listViewClient.getItems().clear();
         listViewClient.getItems().addAll(dir.list());
-        network = new NettyNetwork(s -> Platform.runLater(() -> {
-            statusBar.setText("true");
-            String[] files = s.getContentM();
-            listViewServer.getItems().clear();
-            listViewServer.getItems().addAll(files);
-        }));
+
+        network = new NettyNetwork(command -> {
+            switch (command.getType()) {
+                case LIST_RESPONSE:
+                    ListResponse files = (ListResponse) command;
+                    Platform.runLater(() -> {
+                        listViewServer.getItems().clear();
+                        listViewServer.getItems().addAll(files.getNames());
+                        statusBar.setText("true");
+                    });
+                    break;
+            }
+        });
     }
 
+    @SneakyThrows
+    @FXML
     public void refreshAll() {
-        network.writeMessage(new Message("dir"));
+        network.writeMessage(new ListRequest());
         refresh();
     }
 }
