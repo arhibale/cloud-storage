@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
 
@@ -53,6 +54,8 @@ public class CommandHandler extends SimpleChannelInboundHandler<AbstractCommand>
     }
 
     private void copyFile(File fileClient, File newFile) throws IOException {
-        Files.copy(fileClient.toPath(), newFile.toPath());
+        if (fileClient.exists()) {
+            Files.copy(fileClient.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 }

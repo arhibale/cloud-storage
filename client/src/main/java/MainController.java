@@ -2,7 +2,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Objects;
+import java.nio.file.StandardCopyOption;
 import java.util.ResourceBundle;
 
 import javafx.application.Platform;
@@ -40,6 +40,7 @@ public class MainController implements Initializable {
     @SneakyThrows
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        setStatusBar("(>^_^)> hello! <(^_^<)");
         root = new File("./client/clientFiles");
         refresh();
         network = new NettyNetwork(command -> {
@@ -53,12 +54,12 @@ public class MainController implements Initializable {
                 Platform.runLater(() -> {
                     listViewServer.getItems().clear();
                     listViewServer.getItems().addAll(files.getNames());
-                    statusBar.setText("true");
                 });
             } else if (command.getType() == CommandType.FILE_MESSAGE) {
                 FileMessage fileMessage = (FileMessage) command;
                 copyFile(fileMessage.getFile(), new File(root + "/" + fileMessage.getFileName()));
                 refreshAll();
+                setStatusBar("the file is uploaded!(^-^)");
             }
         });
         listViewListener();
@@ -69,6 +70,7 @@ public class MainController implements Initializable {
         String fileName = listViewClient.getFocusModel().getFocusedItem();
         File file = new File(root + "/" + fileName);
         network.writeMessage(new FileMessage(file, file.getName(), file.length()));
+        setStatusBar("the file has been sent!(>_<)");
     }
 
     @FXML
@@ -91,7 +93,9 @@ public class MainController implements Initializable {
     }
 
     private void copyFile(File fileServer, File newFile) throws IOException {
-        Files.copy(fileServer.toPath(), newFile.toPath());
+        if (fileServer.exists()) {
+            Files.copy(fileServer.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
     private void listViewListener() {
@@ -99,11 +103,14 @@ public class MainController implements Initializable {
             MultipleSelectionModel<String> selectionModelClient = listViewClient.getSelectionModel();
             MultipleSelectionModel<String> selectionModelServer = listViewServer.getSelectionModel();
             selectionModelClient.selectedItemProperty()
-                    .addListener((observable, oldValue, newValue) ->
-                            fileInfoClient.setText("name: " + newValue +
-                                    " size: " + new File(root + "/" + newValue).length() + " byte"));
+                    .addListener((observable, oldValue, newValue) -> fileInfoClient.setText("name: " + newValue +
+                            " size: " + new File(root + "/" + newValue).length() + " byte"));
             selectionModelServer.selectedItemProperty()
                     .addListener((observable, oldValue, newValue) -> network.writeMessage(new FileInfoRequest(newValue)));
         });
+    }
+
+    private void setStatusBar(String str) {
+        statusBar.setText(str);
     }
 }
