@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Menu?>
@@ -11,19 +13,15 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="style.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.arhibale.controllers.ClientMainController">
     <MenuBar>
         <Menu mnemonicParsing="false" text="File">
-            <MenuItem mnemonicParsing="false" text="Close" />
-        </Menu>
-        <Menu mnemonicParsing="false" text="Edit">
-            <MenuItem mnemonicParsing="false" text="Delete" />
-        </Menu>
-        <Menu mnemonicParsing="false" text="Help">
-            <MenuItem mnemonicParsing="false" text="About" />
+            <MenuItem mnemonicParsing="false" text="Open..." />
+            <MenuItem mnemonicParsing="false" onAction="#fileExitAction" text="Exit" />
         </Menu>
     </MenuBar>
     <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="375.0" prefWidth="600.0">
@@ -43,33 +41,72 @@
             <GridPane.margin>
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
             </GridPane.margin>
+         <contextMenu>
+            <ContextMenu>
+              <items>
+                  <MenuItem mnemonicParsing="false" text="Copy" />
+                  <MenuItem mnemonicParsing="false" text="Сut" />
+                  <MenuItem mnemonicParsing="false" text="Insert" />
+                  <MenuItem mnemonicParsing="false" text="Delete" />
+                  <MenuItem mnemonicParsing="false" text="Rename" />
+              </items>
+            </ContextMenu>
+         </contextMenu>
         </ListView>
         <ListView fx:id="listViewServer" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
             <GridPane.margin>
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
             </GridPane.margin>
+         <contextMenu>
+            <ContextMenu>
+               <items>
+                  <MenuItem mnemonicParsing="false" text="Copy" />
+                  <MenuItem mnemonicParsing="false" text="Cut" />
+                  <MenuItem mnemonicParsing="false" text="Insert" />
+                  <MenuItem mnemonicParsing="false" text="Delete" />
+                  <MenuItem mnemonicParsing="false" text="Rename" />
+               </items>
+            </ContextMenu>
+         </contextMenu>
         </ListView>
-        <TextField GridPane.columnIndex="1" GridPane.rowIndex="1">
-            <GridPane.margin>
-                <Insets left="5.0" right="5.0" />
-            </GridPane.margin>
-        </TextField>
-        <TextField editable="false" GridPane.columnIndex="3" GridPane.rowIndex="1">
-            <GridPane.margin>
-                <Insets left="5.0" right="5.0" />
-            </GridPane.margin>
-        </TextField>
         <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
-            <TextField fx:id="statusBar" alignment="CENTER" editable="false" layoutX="26.0" layoutY="311.0" />
+            <TextField fx:id="statusBar" alignment="CENTER" editable="false" layoutY="298.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="298.0" />
             <Button layoutX="74.0" layoutY="267.0" mnemonicParsing="false" onAction="#refreshAll" text="refresh" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="74.0" AnchorPane.rightAnchor="73.0" AnchorPane.topAnchor="267.0" />
             <Button layoutX="123.0" layoutY="144.0" mnemonicParsing="false" onAction="#fromTheServer" text="&lt;" textAlignment="CENTER" AnchorPane.bottomAnchor="168.0" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="144.0" />
             <Button layoutX="22.0" layoutY="144.0" mnemonicParsing="false" onAction="#toTheServer" text="&gt;" textAlignment="CENTER" AnchorPane.bottomAnchor="168.0" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="125.0" AnchorPane.topAnchor="144.0" />
         </AnchorPane>
         <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
-            <Label fx:id="fileInfoClient" layoutX="5.0" prefHeight="17.0" prefWidth="190.0"/>
+            <Label fx:id="fileInfoClient" layoutX="5.0" prefHeight="17.0" prefWidth="190.0" />
         </AnchorPane>
         <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="3">
-            <Label fx:id="fileInfoServer" layoutX="5.0" prefHeight="17.0" prefWidth="190.0"/>
+            <Label fx:id="fileInfoServer" layoutX="5.0" prefHeight="17.0" prefWidth="190.0" />
         </AnchorPane>
+        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <TextField fx:id="clientDir" prefHeight="25.0" prefWidth="160.0">
+                <HBox.margin>
+                    <Insets bottom="5.0" left="5.0" top="5.0" />
+                </HBox.margin>
+            </TextField>
+            <Button mnemonicParsing="false" onAction="#upDirClient" text="^">
+                <HBox.margin>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                </HBox.margin>
+            </Button>
+        </HBox>
+        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+            <TextField fx:id="serverDir" editable="false" prefHeight="25.0" prefWidth="160.0">
+                <HBox.margin>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                </HBox.margin>
+            </TextField>
+            <Button mnemonicParsing="false" onAction="#upDirServer" text="^">
+                <HBox.margin>
+                    <Insets bottom="5.0" right="5.0" top="5.0" />
+                </HBox.margin>
+            </Button>
+        </HBox>
+      <cursor>
+         <Cursor fx:constant="DEFAULT" />
+      </cursor>
     </GridPane>
 </VBox>

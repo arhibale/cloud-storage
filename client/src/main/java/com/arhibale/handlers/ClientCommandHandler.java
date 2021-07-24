@@ -1,3 +1,6 @@
+package com.arhibale.handlers;
+
+import com.arhibale.netty.CallBack;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import model.AbstractCommand;

@@ -1,5 +1,6 @@
+package com.arhibale.netty;
+
 import model.AbstractCommand;
-import model.Message;
 
 import java.io.IOException;
 

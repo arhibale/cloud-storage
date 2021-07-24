@@ -1,3 +1,7 @@
+package com.arhibale.netty;
+
+import com.arhibale.handlers.ClientCommandHandler;
+import com.arhibale.netty.CallBack;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -17,14 +21,13 @@ public class NettyNetwork {
 
     private final String IP = "localhost";
     private final int PORT = 8189;
+    private final EventLoopGroup worker;
 
-    private final CallBack callBack;
     private SocketChannel channel;
 
     public NettyNetwork(CallBack callBack) {
-        this.callBack = callBack;
+        worker = new NioEventLoopGroup();
         Thread thread = new Thread(() -> {
-            EventLoopGroup worker = new NioEventLoopGroup();
             try {
                 Bootstrap bootstrap = new Bootstrap();
                 bootstrap.group(worker);
@@ -46,7 +49,7 @@ public class NettyNetwork {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                worker.shutdownGracefully();
+                doStop();
             }
         });
         thread.setDaemon(true);
@@ -55,5 +58,9 @@ public class NettyNetwork {
 
     public void writeMessage(AbstractCommand command) {
         channel.writeAndFlush(command);
+    }
+
+    public void doStop() {
+        worker.shutdownGracefully();
     }
 }
