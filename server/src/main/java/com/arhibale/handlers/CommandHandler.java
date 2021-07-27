@@ -4,18 +4,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
-import model.file.FileInfo;
-import model.file.FileMessage;
-import model.file.FileRequest;
+import model.file.*;
 import model.list.ListRequest;
 import model.list.ListResponse;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.Objects;
 
 
@@ -52,6 +47,27 @@ public class CommandHandler extends SimpleChannelInboundHandler<AbstractCommand>
         } else if (command.getType() == CommandType.FILE_MESSAGE) {
             FileMessage fileMessage = (FileMessage) command;
             copyFile(fileMessage.getFile(), new File(path + separator + fileMessage.getFileName()));
+            refresh();
+        } else if (command.getType() == CommandType.FILE_DELETE) {
+            try {
+                FileDeleteRequest request = (FileDeleteRequest) command;
+                Files.deleteIfExists(new File(path + separator + request.getFileName()).toPath());
+                refresh();
+            } catch (DirectoryNotEmptyException e) {
+                refresh();
+            }
+        } else if (command.getType() == CommandType.FILE_RENAME) {
+            FileRenameRequest request = (FileRenameRequest) command;
+            File file = new File(path + separator + request.getOldName());
+            log.debug("{} - {} - {} - {} - {}", request.getNewName(), request.getOldName(), path, file.exists(), file.getPath());
+            if (file.exists()) {
+                if (file.renameTo(new File(path + separator + request.getNewName()))) {
+                    refresh();
+                }
+            }
+        } else if (command.getType() == CommandType.NEW_FOLDER) {
+            CreateNewFolderRequest request = (CreateNewFolderRequest) command;
+            Files.createDirectory(Paths.get(path + separator + request.getName()));
             refresh();
         }
     }

@@ -2,15 +2,21 @@ package com.arhibale.controllers;
 
 import com.arhibale.ClientApp;
 import com.arhibale.netty.NettyNetwork;
+import com.arhibale.netty.NetworkInstance;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MultipleSelectionModel;
-import javafx.scene.control.TextField;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 import model.CommandType;
+import model.file.FileDeleteRequest;
 import model.file.FileInfo;
 import model.file.FileMessage;
 import model.file.FileRequest;
@@ -25,6 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 @Slf4j
@@ -60,26 +67,28 @@ public class ClientMainController implements Initializable {
         network = new NettyNetwork(command -> {
             if (command.getType() == CommandType.LIST_RESPONSE) {
                 ListResponse files = (ListResponse) command;
-                refresh(path, files.getNames());
+                refresh(files.getNames());
                 serverDir.setText(files.getRoot());
                 log.debug("from the server: {}", command.getType());
             } else if (command.getType() == CommandType.FILE_INFO) {
                 FileInfo fileInfo = (FileInfo) command;
-                Platform.runLater(() -> {
-                    fileInfoServer.setText("size: " + fileInfo.getFileLength() + " bytes");
-                });
+                Platform.runLater(() -> fileInfoServer.setText("size: " + fileInfo.getFileLength() + " bytes"));
             } else if (command.getType() == CommandType.FILE_MESSAGE) {
                 FileMessage fileMessage = (FileMessage) command;
                 copyFile(fileMessage.getFile(), new File(path + separator + fileMessage.getFileName()));
-                refreshAll();
+                refreshRequest();
                 setStatusBar("the file is uploaded!(^-^)");
                 log.debug("from the server: {}", command.getType());
             }
         });
 
+        NetworkInstance.nettyNetwork = network;
+
         listViewClickedClientListener();
         listViewClickedServerListener();
         sizeFocusItemListener();
+        contextMenuClientListener();
+        contextMenuServerListener();
     }
 
     @FXML
@@ -89,17 +98,22 @@ public class ClientMainController implements Initializable {
     }
 
     @FXML
-    private void refreshAll() {
+    private void refreshRequest() {
         network.writeMessage(new ListRequest());
     }
 
-    private void refresh(Path client, List<String> server) {
+    private void refreshClient() {
         Platform.runLater(() -> {
             listViewClient.getItems().clear();
-            listViewClient.getItems().addAll(client.toFile().list());
+            listViewClient.getItems().addAll(path.toFile().list());
             listViewClient.getItems().sort((o1, o2) -> new Long(new File(path + separator + o1).length() -
                     new File(path + separator + o2).length()).intValue());
+        });
+    }
 
+    private void refresh(List<String> server) {
+        Platform.runLater(() -> {
+            refreshClient();
             listViewServer.getItems().clear();
             listViewServer.getItems().addAll(server);
         });
@@ -141,9 +155,7 @@ public class ClientMainController implements Initializable {
     }
 
     private void closeWindowListener() {
-        Platform.runLater(() -> {
-            ClientApp.mainStage.setOnCloseRequest(event -> network.doStop());
-        });
+        Platform.runLater(() -> ClientApp.mainStage.setOnCloseRequest(event -> network.doStop()));
     }
 
     private void copyFile(File oldFile, File newFile) throws IOException {
@@ -153,7 +165,7 @@ public class ClientMainController implements Initializable {
     private void goToPathClient(Path p) {
         path = p;
         clientDir.setText(path.toString());
-        refreshAll();
+        refreshClient();
     }
 
     private void listViewClickedClientListener() {
@@ -187,5 +199,125 @@ public class ClientMainController implements Initializable {
             selectionModelServer.selectedItemProperty()
                     .addListener((observable, oldValue, newValue) -> network.writeMessage(new FileRequest(newValue, true)));
         });
+    }
+
+    private void contextMenuClientListener() {
+        listViewClient.setCellFactory(lv -> {
+            ListCell<String> cell = new ListCell<>();
+            ContextMenu contextMenu = new ContextMenu();
+
+            MenuItem renameItem = new MenuItem();
+            renameItem.textProperty().bind(Bindings.format("Rename"));
+            renameItem.setOnAction(event -> {
+                String item = cell.getItem();
+                try {
+                    openFileManipulationWindow(item, true);
+                    refreshClient();
+                } catch (IOException e) {
+                    log.error("", e);
+                }
+            });
+            MenuItem deleteItem = new MenuItem();
+            deleteItem.textProperty().bind(Bindings.format("Delete"));
+            deleteItem.setOnAction(event -> {
+                try {
+                    Files.deleteIfExists(Paths.get(path + separator + cell.getItem()));
+                    refreshClient();
+                    setStatusBar("delete " + cell.getItem() + "(P-P)");
+                } catch (IOException e) {
+                    log.error("", e);
+                }
+            });
+
+            contextMenu.getItems().addAll(renameItem, deleteItem);
+            cell.textProperty().bind(cell.itemProperty());
+            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+                if (isNowEmpty) {
+                    cell.setContextMenu(null);
+                } else {
+                    cell.setContextMenu(contextMenu);
+                }
+            });
+            return cell ;
+        });
+    }
+
+    private void contextMenuServerListener() {
+        listViewServer.setCellFactory(lv -> {
+            ListCell<String> cell = new ListCell<>();
+            ContextMenu contextMenu = new ContextMenu();
+
+            MenuItem renameItem = new MenuItem();
+            renameItem.textProperty().bind(Bindings.format("Rename"));
+            renameItem.setOnAction(event -> {
+                try {
+                    String item = cell.getItem();
+                    openFileManipulationWindow(item, false);
+                } catch (IOException e) {
+                    log.error("", e);
+                }
+                refreshRequest();
+            });
+            MenuItem deleteItem = new MenuItem();
+            deleteItem.textProperty().bind(Bindings.format("Delete"));
+            deleteItem.setOnAction(event -> {
+                network.writeMessage(new FileDeleteRequest(cell.getItem()));
+                refreshRequest();
+                setStatusBar("delete " + cell.getItem() + "(P-P)");
+            });
+
+            contextMenu.getItems().addAll(renameItem, deleteItem);
+            cell.textProperty().bind(cell.itemProperty());
+            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+                if (isNowEmpty) {
+                    cell.setContextMenu(null);
+                } else {
+                    cell.setContextMenu(contextMenu);
+                }
+            });
+            return cell ;
+        });
+    }
+
+    private void openFileManipulationWindow(String item, boolean is) throws IOException {
+        Parent parent = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/window/rename.fxml")));
+        Stage renameStage = new Stage();
+        renameStage.initModality(Modality.APPLICATION_MODAL);
+        renameStage.setScene(new Scene(parent));
+        renameStage.setResizable(false);
+        if (is) {
+            renameStage.setTitle(path + "\\" + item);
+        } else {
+            renameStage.setTitle("server: " + item);
+        }
+        log.debug("open rename " + item + " window");
+        renameStage.showAndWait();
+        setStatusBar("rename " + item + "(d-d)");
+    }
+
+    @FXML
+    private void addFile() throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        List<File> list = fileChooser.showOpenMultipleDialog(ClientApp.mainStage);
+        for(File file : list) {
+            if (file.exists()) {
+                copyFile(file.getAbsoluteFile(), new File(path + separator + file.getName()));
+            }
+        }
+        refreshClient();
+    }
+
+    @FXML
+    private void createNewFolderClient() throws IOException {
+        openFileManipulationWindow("-1", true);
+        setStatusBar("create new folder!\\(^-^)/");
+        refreshClient();
+    }
+
+    @FXML
+    private void createNewFolderServer() throws IOException {
+        openFileManipulationWindow("-2", false);
+        setStatusBar("create new folder!\\(^-^)/");
+        refreshRequest();
     }
 }

@@ -17,10 +17,10 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="style.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.arhibale.controllers.ClientMainController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.arhibale.controllers.ClientMainController">
     <MenuBar>
         <Menu mnemonicParsing="false" text="File">
-            <MenuItem mnemonicParsing="false" text="Open..." />
+            <MenuItem mnemonicParsing="false" onAction="#addFile" text="Add..." />
             <MenuItem mnemonicParsing="false" onAction="#fileExitAction" text="Exit" />
         </Menu>
     </MenuBar>
@@ -44,11 +44,7 @@
          <contextMenu>
             <ContextMenu>
               <items>
-                  <MenuItem mnemonicParsing="false" text="Copy" />
-                  <MenuItem mnemonicParsing="false" text="Сut" />
-                  <MenuItem mnemonicParsing="false" text="Insert" />
-                  <MenuItem mnemonicParsing="false" text="Delete" />
-                  <MenuItem mnemonicParsing="false" text="Rename" />
+                <MenuItem onAction="#createNewFolderClient" mnemonicParsing="false" text="Create new folder" />
               </items>
             </ContextMenu>
          </contextMenu>
@@ -60,18 +56,14 @@
          <contextMenu>
             <ContextMenu>
                <items>
-                  <MenuItem mnemonicParsing="false" text="Copy" />
-                  <MenuItem mnemonicParsing="false" text="Cut" />
-                  <MenuItem mnemonicParsing="false" text="Insert" />
-                  <MenuItem mnemonicParsing="false" text="Delete" />
-                  <MenuItem mnemonicParsing="false" text="Rename" />
+                  <MenuItem onAction="#createNewFolderServer" mnemonicParsing="false" text="Create new folder" />
                </items>
             </ContextMenu>
          </contextMenu>
         </ListView>
         <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
             <TextField fx:id="statusBar" alignment="CENTER" editable="false" layoutY="298.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="298.0" />
-            <Button layoutX="74.0" layoutY="267.0" mnemonicParsing="false" onAction="#refreshAll" text="refresh" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="74.0" AnchorPane.rightAnchor="73.0" AnchorPane.topAnchor="267.0" />
+            <Button layoutX="74.0" layoutY="267.0" mnemonicParsing="false" onAction="#refreshRequest" text="refresh" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="74.0" AnchorPane.rightAnchor="73.0" AnchorPane.topAnchor="267.0" />
             <Button layoutX="123.0" layoutY="144.0" mnemonicParsing="false" onAction="#fromTheServer" text="&lt;" textAlignment="CENTER" AnchorPane.bottomAnchor="168.0" AnchorPane.leftAnchor="123.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="144.0" />
             <Button layoutX="22.0" layoutY="144.0" mnemonicParsing="false" onAction="#toTheServer" text="&gt;" textAlignment="CENTER" AnchorPane.bottomAnchor="168.0" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="125.0" AnchorPane.topAnchor="144.0" />
         </AnchorPane>

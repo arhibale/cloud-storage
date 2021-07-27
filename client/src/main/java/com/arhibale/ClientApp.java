@@ -13,7 +13,7 @@ public class ClientApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent parent = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/main-w.fxml")));
+        Parent parent = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/window/main-w.fxml")));
         primaryStage.setScene(new Scene(parent));
         primaryStage.setResizable(false);
         primaryStage.setTitle("Client Cloud Storage");
