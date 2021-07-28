@@ -54,8 +54,9 @@ public class ClientMainController implements Initializable {
 
     private NettyNetwork network;
     private Path path;
+    private File copyFile;
     private final Path root = Paths.get("client/clientFiles");
-    private final String separator = "/";
+    private final String separator = "\\";
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -75,7 +76,7 @@ public class ClientMainController implements Initializable {
                 Platform.runLater(() -> fileInfoServer.setText("size: " + fileInfo.getFileLength() + " bytes"));
             } else if (command.getType() == CommandType.FILE_MESSAGE) {
                 FileMessage fileMessage = (FileMessage) command;
-                copyFile(fileMessage.getFile(), new File(path + separator + fileMessage.getFileName()));
+                copyFileAction(fileMessage.getFile(), new File(path + separator + fileMessage.getFileName()));
                 refreshRequest();
                 setStatusBar("the file is uploaded!(^-^)");
                 log.debug("from the server: {}", command.getType());
@@ -158,7 +159,7 @@ public class ClientMainController implements Initializable {
         Platform.runLater(() -> ClientApp.mainStage.setOnCloseRequest(event -> network.doStop()));
     }
 
-    private void copyFile(File oldFile, File newFile) throws IOException {
+    private void copyFileAction(File oldFile, File newFile) throws IOException {
         Files.copy(oldFile.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -228,8 +229,14 @@ public class ClientMainController implements Initializable {
                     log.error("", e);
                 }
             });
+            MenuItem copyItem = new MenuItem();
+            copyItem.textProperty().bind(Bindings.format("Copy"));
+            copyItem.setOnAction(event -> {
+                copyFile = new File(path + separator + cell.getItem());
+                setStatusBar("copy " + copyFile.getName() + "(_-_)");
+            });
 
-            contextMenu.getItems().addAll(renameItem, deleteItem);
+            contextMenu.getItems().addAll(copyItem, renameItem, deleteItem);
             cell.textProperty().bind(cell.itemProperty());
             cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
                 if (isNowEmpty) {
@@ -286,7 +293,7 @@ public class ClientMainController implements Initializable {
         renameStage.setScene(new Scene(parent));
         renameStage.setResizable(false);
         if (is) {
-            renameStage.setTitle(path + "\\" + item);
+            renameStage.setTitle(path + separator + item);
         } else {
             renameStage.setTitle("server: " + item);
         }
@@ -301,7 +308,7 @@ public class ClientMainController implements Initializable {
         List<File> list = fileChooser.showOpenMultipleDialog(ClientApp.mainStage);
         for(File file : list) {
             if (file.exists()) {
-                copyFile(file.getAbsoluteFile(), new File(path + separator + file.getName()));
+                copyFileAction(file.getAbsoluteFile(), new File(path + separator + file.getName()));
             }
         }
         refreshClient();
@@ -319,5 +326,22 @@ public class ClientMainController implements Initializable {
         openFileManipulationWindow("-2", false);
         setStatusBar("create new folder!\\(^-^)/");
         refreshRequest();
+    }
+
+    @FXML
+    private void insertFileClient() throws IOException {
+        if (copyFile != null) {
+            copyFileAction(copyFile, new File(path + separator + copyFile.getName()));
+            refreshClient();
+            setStatusBar("insert " + copyFile.getName() + "(-_-)");
+        }
+    }
+
+    @FXML
+    private void insertFileServer() {
+        if (copyFile != null) {
+            network.writeMessage(new FileMessage(copyFile, copyFile.getName(), copyFile.length()));
+            setStatusBar("insert " + copyFile.getName() + "(-_-)");
+        }
     }
 }
