@@ -5,18 +5,20 @@ import model.CommandType;
 
 public class ListRequest implements AbstractCommand {
 
-    private final String nameDirectory;
+    private final String upDirectory;
+    private final String login;
 
-    public ListRequest() {
-        nameDirectory = "";
+    public ListRequest(String upDirectory, String login) {
+        this.upDirectory = upDirectory;
+        this.login = login;
     }
 
-    public ListRequest(String nameDirectory) {
-        this.nameDirectory = nameDirectory;
+    public String getLogin() {
+        return login;
     }
 
-    public String getNameDirectory() {
-        return nameDirectory;
+    public String getUpDirectory() {
+        return upDirectory;
     }
 
     @Override

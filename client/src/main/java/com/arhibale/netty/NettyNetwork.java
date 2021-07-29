@@ -44,7 +44,6 @@ public class NettyNetwork {
                     }
                 });
                 ChannelFuture future = bootstrap.connect(IP, PORT).sync();
-                writeMessage(new ListRequest());
                 future.channel().closeFuture().sync();
             } catch (Exception e) {
                 e.printStackTrace();

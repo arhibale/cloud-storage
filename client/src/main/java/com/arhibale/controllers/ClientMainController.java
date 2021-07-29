@@ -14,8 +14,11 @@ import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import model.CommandType;
+import model.auth.AuthDisconnect;
+import model.auth.AuthResponse;
 import model.file.FileDeleteRequest;
 import model.file.FileInfo;
 import model.file.FileMessage;
@@ -55,9 +58,10 @@ public class ClientMainController implements Initializable {
     private NettyNetwork network;
     private Path path;
     private File copyFile;
-    private final Path root = Paths.get("client/clientFiles");
+    private final Path root = Paths.get("client/localFiles");
     private final String separator = "\\";
 
+    @SneakyThrows
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         closeWindowListener();
@@ -66,6 +70,16 @@ public class ClientMainController implements Initializable {
         clientDir.setText(path.toString());
 
         network = new NettyNetwork(command -> {
+            if (command.getType() == CommandType.AUTH_RESPONSE) {
+                AuthResponse response = (AuthResponse) command;
+                if (response.getAuthResponse().equals("/auth")) {
+                    NetworkInstance.auth = response.getAuthResponse();
+                    NetworkInstance.login = response.getLogin();
+                    network.writeMessage(new ListRequest("", NetworkInstance.login));
+                } else if (response.getAuthResponse().equals("/warn")){
+                    NetworkInstance.auth = response.getAuthResponse();
+                }
+            }
             if (command.getType() == CommandType.LIST_RESPONSE) {
                 ListResponse files = (ListResponse) command;
                 refresh(files.getNames());
@@ -82,8 +96,8 @@ public class ClientMainController implements Initializable {
                 log.debug("from the server: {}", command.getType());
             }
         });
-
-        NetworkInstance.nettyNetwork = network;
+        NetworkInstance.nettyNetworkInstance = network;
+        openAuthWindow();
 
         listViewClickedClientListener();
         listViewClickedServerListener();
@@ -100,7 +114,7 @@ public class ClientMainController implements Initializable {
 
     @FXML
     private void refreshRequest() {
-        network.writeMessage(new ListRequest());
+        network.writeMessage(new ListRequest("", NetworkInstance.login));
     }
 
     private void refreshClient() {
@@ -148,7 +162,7 @@ public class ClientMainController implements Initializable {
 
     @FXML
     private void upDirServer() {
-        network.writeMessage(new ListRequest("/up"));
+        network.writeMessage(new ListRequest("/up", NetworkInstance.login));
     }
 
     public void setStatusBar(String str) {
@@ -183,7 +197,7 @@ public class ClientMainController implements Initializable {
     private void listViewClickedServerListener() {
         listViewServer.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
-                network.writeMessage(new ListRequest(listViewServer.getFocusModel().getFocusedItem()));
+                network.writeMessage(new ListRequest(listViewServer.getFocusModel().getFocusedItem(), NetworkInstance.login));
             }
         });
     }
@@ -302,16 +316,30 @@ public class ClientMainController implements Initializable {
         setStatusBar("rename " + item + "(d-d)");
     }
 
+    private void openAuthWindow() throws IOException {
+        Parent parent = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/window/auth.fxml")));
+        Stage auth = new Stage();
+        auth.initModality(Modality.APPLICATION_MODAL);
+        auth.setScene(new Scene(parent, 300, 140));
+        auth.setResizable(false);
+        auth.setTitle("Auth");
+        log.debug("open auth window");
+        auth.showAndWait();
+    }
+
     @FXML
     private void addFile() throws IOException {
         FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Add file");
         List<File> list = fileChooser.showOpenMultipleDialog(ClientApp.mainStage);
-        for(File file : list) {
-            if (file.exists()) {
-                copyFileAction(file.getAbsoluteFile(), new File(path + separator + file.getName()));
+        if (!list.isEmpty()) {
+            for(File file : list) {
+                if (file.exists()) {
+                    copyFileAction(file.getAbsoluteFile(), new File(path + separator + file.getName()));
+                }
             }
+            refreshClient();
         }
-        refreshClient();
     }
 
     @FXML
@@ -343,5 +371,11 @@ public class ClientMainController implements Initializable {
             network.writeMessage(new FileMessage(copyFile, copyFile.getName(), copyFile.length()));
             setStatusBar("insert " + copyFile.getName() + "(-_-)");
         }
+    }
+
+    @FXML
+    private void disconnect() throws IOException {
+        network.writeMessage(new AuthDisconnect(NetworkInstance.login));
+        openAuthWindow();
     }
 }

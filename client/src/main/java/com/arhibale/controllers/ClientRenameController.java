@@ -19,7 +19,7 @@ import java.nio.file.Paths;
 public class ClientRenameController {
     @FXML
     private TextField renameTextField;
-    private final NettyNetwork network = NetworkInstance.nettyNetwork;
+    private final NettyNetwork network = NetworkInstance.nettyNetworkInstance;
     private String fileName;
     private String path;
 

@@ -21,6 +21,7 @@
     <MenuBar>
         <Menu mnemonicParsing="false" text="File">
             <MenuItem mnemonicParsing="false" onAction="#addFile" text="Add..." />
+            <MenuItem mnemonicParsing="false" onAction="#disconnect" text="Disconnect" />
             <MenuItem mnemonicParsing="false" onAction="#fileExitAction" text="Exit" />
         </Menu>
     </MenuBar>
