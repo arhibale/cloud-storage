@@ -52,9 +52,8 @@ public class CommandHandler extends SimpleChannelInboundHandler<AbstractCommand>
         } else if (command.getType() == CommandType.LIST_REQUEST) {
             ListRequest request = (ListRequest) command;
             if (request.getUpDirectory().equals("/up")) {
-                Path p = path.getParent();
-                if (p.equals(root)) {
-                    path = p;
+                if (!path.equals(root)) {
+                    path = path.getParent();
                 }
             } else if (!request.getUpDirectory().equals("")) {
                 File file = new File(path + SEP + request.getUpDirectory());

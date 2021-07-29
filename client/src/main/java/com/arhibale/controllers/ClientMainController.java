@@ -58,13 +58,13 @@ public class ClientMainController implements Initializable {
     private NettyNetwork network;
     private Path path;
     private File copyFile;
-    private final Path root = Paths.get("client/localFiles");
+    private final Path beginning = Paths.get("client/localFiles");
+    private final Path root = beginning;
     private final String separator = "\\";
 
     @SneakyThrows
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        closeWindowListener();
         setStatusBar("(>^_^)> hello! <(^_^<)");
         path = root;
         clientDir.setText(path.toString());
@@ -99,6 +99,7 @@ public class ClientMainController implements Initializable {
         NetworkInstance.nettyNetworkInstance = network;
         openAuthWindow();
 
+        closeWindowListener();
         listViewClickedClientListener();
         listViewClickedServerListener();
         sizeFocusItemListener();
@@ -154,8 +155,8 @@ public class ClientMainController implements Initializable {
 
     @FXML
     private void upDirClient() {
-        Path p = path.getParent();
-        if (p.equals(root)) {
+        if (!path.equals(root)) {
+            Path p = path.getParent();
             goToPathClient(p);
         }
     }
